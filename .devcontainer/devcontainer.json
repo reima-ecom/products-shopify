@@ -1,0 +1,8 @@
+{
+  "name": "Elixir",
+  "image": "elixir",
+  "extensions": [
+    "mjmcloug.vscode-elixir",
+    "jakebecker.elixir-ls"
+  ],
+}
