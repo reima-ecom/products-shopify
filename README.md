@@ -1,21 +1,43 @@
-# ProductsShopify
+# Shopify product importer
 
-**TODO: Add description**
+- create stream of product nodes
+- transform nodes to domain
+- serialize domain products (for hugo)
+- write (to disk)
 
-## Installation
+## Needed structure for frontend
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `products_shopify` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:products_shopify, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/products_shopify](https://hexdocs.pm/products_shopify).
-
+- identification
+  - handle
+  - legacy id
+- basic product specifics
+  - title
+  - price
+  - available (for indicating sold out products)
+- calculated product specifics
+  - has price range (for "from...")
+  - compare at price (for "discount" thingy)
+- shopify pim workaround
+  - description (html)
+  - features text (not implemented currently)
+  - features tags (not implemented currently)
+  - materials text (not implemented currently)
+  - care text (not implemented currently)
+- resources
+  - name (for sorting)
+  - src
+- options array
+  - name
+  - first available value?
+  - values array
+    - name
+    - checked initially?
+    - available initially
+- variants
+  - id (for add to cart)
+  - available
+  - price
+  - compare at price
+  - image name (for scrolling on color change)
+  - options (for getting the variant)
+    - name: value
