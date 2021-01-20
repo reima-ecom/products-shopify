@@ -1,10 +1,11 @@
 defmodule ProductsShopify.Product do
+  require Logger
 
   def write(shopify_product) do
     shopify_product
     |> to_domain()
     |> serialize()
-    |> write_to_console()
+    |> write_to_disk()
   end
 
   def to_domain(%{
@@ -71,7 +72,17 @@ defmodule ProductsShopify.Product do
     }
   end
 
-  def write_to_console({product, _product_dto}) do
-    IO.puts("Writing #{product.handle}")
+  defp get_file_path(handle), do: Path.join(["products", handle, "index.html"])
+
+  def write_to_disk({%{handle: handle}, product_dto}) do
+    filepath = get_file_path(handle)
+    Logger.info("Writing #{filepath}")
+
+    filepath
+    |> Path.dirname()
+    |> File.mkdir_p!()
+
+    filepath
+    |> File.write!(product_dto)
   end
 end

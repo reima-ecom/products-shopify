@@ -1,4 +1,6 @@
 defmodule ProductsShopify.Images do
+  require Logger
+
   def write(shopify_product) do
     shopify_product
     |> to_domain
@@ -44,17 +46,17 @@ defmodule ProductsShopify.Images do
   defp image_exists(%{filepath: filepath}) do
     case File.exists?(filepath) do
       true ->
-        IO.puts("Image exists: #{filepath}")
+        Logger.debug("Image exists: #{filepath}")
         false
 
       false ->
-        IO.puts("Not found: #{filepath}")
+        Logger.debug("Not found: #{filepath}")
         true
     end
   end
 
   defp download(%{src: src, filepath: filepath}) do
-    IO.puts("Downloading #{filepath}")
+    Logger.info("Downloading #{filepath}")
     %HTTPoison.Response{body: body} = HTTPoison.get!(src)
     File.mkdir_p!(Path.dirname(filepath))
     File.write!(filepath, body)
