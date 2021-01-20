@@ -9,6 +9,8 @@
   - check which images need downloading
   - download images
 
+product transformer can assume image availability
+
 ## Needed structure for frontend
 
 - identification
