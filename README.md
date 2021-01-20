@@ -1,9 +1,13 @@
 # Shopify product importer
 
 - create stream of product nodes
-- transform nodes to domain
-- serialize domain products (for hugo)
-- write (to disk)
+- write each product to disk
+  - transform nodes to domain
+  - serialize domain products (for hugo)
+  - write products (to disk)
+- download each image
+  - check which images need downloading
+  - download images
 
 ## Needed structure for frontend
 

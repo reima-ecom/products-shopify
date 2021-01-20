@@ -39,15 +39,6 @@ defmodule ProductsShopify.CLI do
   end
 
   def process({shop, token}) do
-    ProductsShopify.ShopifyApi.fetch(shop, token)
-    |> get_body
-    |> IO.puts
-  end
-
-  defp get_body({:ok, body}), do: body
-
-  defp get_body({_, error}) do
-    IO.puts("Error fetching from Github: #{error}")
-    System.halt(2)
+    ProductsShopify.import(shop, token)
   end
 end

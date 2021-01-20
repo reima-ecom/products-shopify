@@ -1,7 +1,7 @@
-defmodule ProductsShopify.ShopifyApi do
+defmodule ProductsShopify.Stream do
   use PlumberGirl
 
-  def stream(shop, token) do
+  def create(shop, token) do
     Stream.resource(
       fn -> {shop, token, false, true} end,
       &get_next_products/1,
@@ -30,30 +30,6 @@ defmodule ProductsShopify.ShopifyApi do
   end
 
   def get_next_products({_shop, _token, _cursor, false}), do: {:halt, nil}
-
-  def fetch_time(shop, token, count) do
-    {time, _result} = :timer.tc(fn -> Stream.run(Stream.take(fetch(shop, token), count)) end)
-    IO.puts("Success in #{Float.round(time / 1_000_000)}s!")
-  end
-
-  def fetch(shop, token) do
-    stream(shop, token)
-    # |> Stream.take(7)
-    |> Stream.map(&to_domain/1)
-    |> Stream.map(&serialize/1)
-    |> Stream.map(&write/1)
-  end
-
-  def serialize(product) do
-    {
-      product,
-      Poison.encode!(product)
-    }
-  end
-
-  def write({product, _product_dto}) do
-    IO.puts("Writing #{product.handle}")
-  end
 
   @spec headers(String.t()) :: [{String.t(), String.t()}, ...]
   def headers(token),
@@ -127,63 +103,6 @@ defmodule ProductsShopify.ShopifyApi do
     }
     """
   end
-
-  def to_domain(%{
-        "node" => product
-      }) do
-    {product, %{}}
-    |> translate_wrapper(&get_product_basics/1)
-    |> translate_wrapper(&get_product_info/1)
-    |> translate_wrapper(&get_product_options/1)
-    |> extract_domain_product()
-  end
-
-  def translate_wrapper({shopify_product, domain_product}, translator) do
-    {
-      shopify_product,
-      Map.merge(domain_product, translator.(shopify_product))
-    }
-  end
-
-  def get_product_basics(%{
-        "handle" => handle,
-        "title" => title,
-        "availableForSale" => available,
-        "priceRange" => %{
-          "maxVariantPrice" => %{"amount" => max_price},
-          "minVariantPrice" => %{"amount" => min_price}
-        },
-        "compareAtPriceRange" => %{
-          "maxVariantPrice" => %{"amount" => compare_at_price}
-        }
-      }) do
-    %{
-      handle: handle,
-      title: title,
-      available: available,
-      # these need to be converted to float
-      has_price_range: max_price > min_price,
-      compare_at_price: compare_at_price
-    }
-  end
-
-  def get_product_info(%{
-        "descriptionHtml" => description_html
-      }) do
-    %{
-      description_html: description_html
-    }
-  end
-
-  def get_product_options(%{
-        "options" => options
-      }) do
-    %{
-      options: options
-    }
-  end
-
-  def extract_domain_product({_, domain_product}), do: domain_product
 
   defp get_body(%{status_code: 200, body: body}), do: {:ok, body}
 
