@@ -30,13 +30,36 @@ defmodule ProductsShopify.Images do
     Path.join(["products", handle])
   end
 
-  defp get_file_name(src) do
+  @doc ~S"""
+  Turn an URL into a filename.
+  The `v` query string parameter is inserted into filename.
+
+  **Only works with query strings that look like `?v=VERSION`.**
+
+  ## Examples
+
+      iex> ProductsShopify.Images.get_file_name("https://cdn.com/imgs/some-image.jpg")
+      "some-image.jpg"
+      iex> ProductsShopify.Images.get_file_name("https://cdn.com/imgs/some-image.jpg?v=1")
+      "some-image__1.jpg"
+
+  """
+  def get_file_name(src) do
     src
     |> String.split("/")
     |> Enum.take(-1)
     |> Enum.at(0)
     |> String.split("?")
-    |> Enum.at(0)
+    |> (fn matches ->
+          case matches do
+            [filename, search] ->
+              Path.rootname(filename) <>
+                "__" <> String.replace(search, "v=", "") <> Path.extname(filename)
+
+            [filename] ->
+              filename
+          end
+        end).()
   end
 
   defp get_images_to_download(images) do
