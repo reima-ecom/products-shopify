@@ -31,8 +31,8 @@ defmodule ProductsShopify.ShopifyApi do
 
   def get_next_products({_shop, _token, _cursor, false}), do: {:halt, nil}
 
-  def fetch_time(shop, token) do
-    {time, _result} = :timer.tc(fn -> Stream.run(fetch(shop, token)) end)
+  def fetch_time(shop, token, count) do
+    {time, _result} = :timer.tc(fn -> Stream.run(Stream.take(fetch(shop, token), count)) end)
     IO.puts("Success in #{Float.round(time / 1_000_000)}s!")
   end
 
@@ -132,68 +132,54 @@ defmodule ProductsShopify.ShopifyApi do
         "node" => product
       }) do
     {product, %{}}
-    |> get_product_basics()
-    |> get_product_info()
-    |> get_product_options()
+    |> translate_wrapper(&get_product_basics/1)
+    |> translate_wrapper(&get_product_info/1)
+    |> translate_wrapper(&get_product_options/1)
     |> extract_domain_product()
   end
 
-  def get_product_basics({shopify_product, domain_product}) do
-    %{
-      "handle" => handle,
-      "title" => title,
-      "availableForSale" => available,
-      "priceRange" => %{
-        "maxVariantPrice" => %{"amount" => max_price},
-        "minVariantPrice" => %{"amount" => min_price}
-      },
-      "compareAtPriceRange" => %{
-        "maxVariantPrice" => %{"amount" => compare_at_price}
-      }
-    } = shopify_product
-
+  def translate_wrapper({shopify_product, domain_product}, translator) do
     {
       shopify_product,
-      Map.merge(domain_product, %{
-        handle: handle,
-        title: title,
-        available: available,
-        # these need to be converted to float
-        has_price_range: max_price > min_price,
-        compare_at_price: compare_at_price
-      })
+      Map.merge(domain_product, translator.(shopify_product))
     }
   end
 
-  def get_product_info({
-        shopify_product,
-        domain_product
+  def get_product_basics(%{
+        "handle" => handle,
+        "title" => title,
+        "availableForSale" => available,
+        "priceRange" => %{
+          "maxVariantPrice" => %{"amount" => max_price},
+          "minVariantPrice" => %{"amount" => min_price}
+        },
+        "compareAtPriceRange" => %{
+          "maxVariantPrice" => %{"amount" => compare_at_price}
+        }
       }) do
     %{
-      "descriptionHtml" => description_html
-    } = shopify_product
-
-    {
-      shopify_product,
-      Map.merge(domain_product, %{
-        description_html: description_html
-      })
+      handle: handle,
+      title: title,
+      available: available,
+      # these need to be converted to float
+      has_price_range: max_price > min_price,
+      compare_at_price: compare_at_price
     }
   end
 
-  def get_product_options({
-        shopify_product,
-        domain_product
+  def get_product_info(%{
+        "descriptionHtml" => description_html
       }) do
     %{
-      "options" => options
-    } = shopify_product
+      description_html: description_html
+    }
+  end
 
-    {
-      shopify_product,
-      Map.merge(domain_product, %{
-        options: options
-      })
+  def get_product_options(%{
+        "options" => options
+      }) do
+    %{
+      options: options
     }
   end
 
