@@ -72,17 +72,31 @@ defmodule ProductsShopify.Product do
     }
   end
 
+  def write_to_disk({%{handle: handle}, product_dto}) do
+    handle
+    |> get_file_path()
+    |> log_write()
+    |> ensure_dir()
+    |> write_file(product_dto)
+  end
+
   defp get_file_path(handle), do: Path.join(["products", handle, "index.html"])
 
-  def write_to_disk({%{handle: handle}, product_dto}) do
-    filepath = get_file_path(handle)
+  defp log_write(filepath) do
     Logger.info("Writing #{filepath}")
+    filepath
+  end
 
+  defp ensure_dir(filepath) do
     filepath
     |> Path.dirname()
     |> File.mkdir_p!()
 
     filepath
-    |> File.write!(product_dto)
+  end
+
+  defp write_file(filepath, contents) do
+    File.write!(filepath, contents)
+    filepath
   end
 end
