@@ -3,6 +3,7 @@ defmodule ProductsShopify do
     ProductsShopify.Stream.create(shop, token)
     |> Stream.each(&ProductsShopify.Product.write/1)
     |> Stream.each(&ProductsShopify.Images.write/1)
+    |> Stream.run()
   end
 
   def import_time(shop, token, count) do

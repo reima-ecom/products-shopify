@@ -26,6 +26,10 @@ defmodule ProductsShopify.CLI do
     {shop, token}
   end
 
+  defp args_to_domain([shop, token, count]) do
+    {shop, token, String.to_integer(count)}
+  end
+
   defp args_to_domain(_) do
     :help
   end
@@ -33,6 +37,7 @@ defmodule ProductsShopify.CLI do
   def process(:help) do
     IO.puts("""
     usage: products <shop> <token>
+    (add an optional count argument to test importer)
     """)
 
     System.halt(0)
@@ -40,5 +45,9 @@ defmodule ProductsShopify.CLI do
 
   def process({shop, token}) do
     ProductsShopify.import(shop, token)
+  end
+
+  def process({shop, token, count}) do
+    ProductsShopify.import_time(shop, token, count)
   end
 end

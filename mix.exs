@@ -5,6 +5,7 @@ defmodule ProductsShopify.MixProject do
     [
       app: :products_shopify,
       version: "0.1.0",
+      escript: escript_config(),
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
       deps: deps()
@@ -26,6 +27,12 @@ defmodule ProductsShopify.MixProject do
       {:plumber_girl, "~> 0.9.7"}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+    ]
+  end
+
+  defp escript_config do
+    [
+      main_module: ProductsShopify.CLI
     ]
   end
 end
